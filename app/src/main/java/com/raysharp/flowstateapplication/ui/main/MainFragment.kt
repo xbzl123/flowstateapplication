@@ -1,6 +1,5 @@
 package com.raysharp.flowstateapplication.ui.main
 
-import androidx.lifecycle.ViewModelProvider
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
@@ -8,14 +7,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.*
 import com.raysharp.flowstateapplication.R
 import com.raysharp.flowstateapplication.databinding.MainFragmentBinding
-import kotlinx.coroutines.cancel
+import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.channels.produce
 
 class MainFragment : Fragment() {
 
@@ -23,6 +20,7 @@ class MainFragment : Fragment() {
         fun newInstance() = MainFragment()
     }
 
+    @InternalCoroutinesApi
     private lateinit var viewModel: MainViewModel
 
     private lateinit var binding:MainFragmentBinding
@@ -36,6 +34,7 @@ class MainFragment : Fragment() {
         return binding.root
     }
 
+    @InternalCoroutinesApi
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         viewModel = ViewModelProvider(this)[MainViewModel::class.java]
@@ -48,7 +47,7 @@ class MainFragment : Fragment() {
         }
         binding.messageLivedata.setOnClickListener {
 //            viewModel.nameLiveData.value = "456"
-            viewModel.nameLiveData.postValue("456")
+//            viewModel.nameLiveData.postValue("456")
         }
 //        diffScopeCommunication()
 
@@ -56,10 +55,12 @@ class MainFragment : Fragment() {
         binding.cancelButton.setOnClickListener {
             Toast.makeText(requireContext(),"cancell sucess!",Toast.LENGTH_SHORT).show()
             //全部取消
-//            viewModelStore.clear()
-//            viewModel.viewModelScope.coroutineContext.cancel()
+            //方法1
+            viewModelStore.clear()
+            //方法2
+            viewModel.viewModelScope.coroutineContext.cancel()
             //单个取消
-//            viewModel.suspendCoroutines()
+            viewModel.suspendCoroutines()
         }
 
         viewModel.nameLiveData.observe(viewLifecycleOwner){
@@ -67,28 +68,67 @@ class MainFragment : Fragment() {
 
         }
 
+//        lifecycleScope.launchWhenStarted {
+//            viewModel.nameStateFlow.collect{
+//                Log.e("nameStateFlow","$it")
+//            }
+            //不生效
+//            viewModel.name1StateFlow.collect{
+//                Log.e("name1StateFlow","$it")
+//            }
+//        }
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.nameStateFlow.collect{
+                    Log.e("nameStateFlow","$it")
+                }
+            }
+        }
         lifecycleScope.launchWhenStarted {
-            viewModel.nameStateFlow.collect{
-                Log.e("nameStateFlow","$it")
+            viewModel.name1StateFlow.collect{
+                Log.e("name1StateFlow","$it")
+            }
+        }
+
+        //第一个协防接收数据
+        lifecycleScope.launch {
+            val sb = StringBuffer()
+            viewModel.sharedFlow.collect {
+                sb.append("<<${it}")
+                binding.messageSharedflow.setText(sb)
+            }
+        }
+        binding.sharedFlowButton.setOnClickListener {
+            // 发送新的数据
+            viewModel.doAsClick()
+            // 发送新的数据以后，启动第二个协程
+            lifecycleScope.launch {
+                val sb = StringBuffer()
+                viewModel.sharedFlow.collect {
+                    sb.append("<<${it}")
+                    binding.messageSharedflow2.text = sb.toString()
+                }
             }
         }
     }
 
     fun diffScopeCommunication(){
         lifecycleScope.launch {
-            val channel = Channel<Int>()
+            val ch = Channel<Int> {  }
             //发射
-            launch {
-                for (i in 1..10){
-                    delay(500)
-                    channel.send(i)
+            val channel = produce {
+                withContext(Dispatchers.IO){
+                    for (i in 1..10){
+                        delay(500)
+                        send(i)
+                    }
+                    close()
                 }
-                channel.close()
             }
             //接收
             launch {
                 for (i in channel){
-                    Log.e("MainFragment","recevice =$i")
+                    Log.e("diffScopeCommunication","recevice =$i")
                 }
             }
         }

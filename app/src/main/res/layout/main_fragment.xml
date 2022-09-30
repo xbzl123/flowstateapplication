@@ -25,13 +25,78 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             >
-            <TextView
-                android:id="@+id/message_stateflow"
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@{String.valueOf(model.nameStateFlow)}"
-                android:layout_marginBottom="20dp"
-                 />
+                android:orientation="horizontal">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="job1:"
+                    android:layout_marginBottom="20dp"
+                    />
+                <TextView
+                    android:id="@+id/message_stateflow"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@{String.valueOf(model.nameStateFlow)}"
+                    android:layout_marginBottom="20dp"
+                    />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="job2:"
+                    android:layout_marginBottom="20dp"
+                    />
+                <TextView
+                    android:id="@+id/message_stateflow1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@{String.valueOf(model.name1StateFlow)}"
+                    android:layout_marginBottom="20dp"
+                    />
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="sharedflow1:"
+                    android:layout_marginBottom="20dp"
+                    />
+                <TextView
+                    android:id="@+id/message_sharedflow"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="20dp"
+                    />
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="sharedflow2:"
+                    android:layout_marginBottom="20dp"
+                    />
+                <TextView
+                    android:id="@+id/message_sharedflow2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="20dp"
+                    />
+            </LinearLayout>
+
             <TextView
                 android:id="@+id/message_livedata"
                 android:layout_width="wrap_content"
@@ -41,12 +106,19 @@
         </LinearLayout>
 
 
-        <TextView
+        <Button
             android:id="@+id/cancel_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="cancel"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+        <Button
+            android:id="@+id/shared_flow_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="SharedFlow"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
