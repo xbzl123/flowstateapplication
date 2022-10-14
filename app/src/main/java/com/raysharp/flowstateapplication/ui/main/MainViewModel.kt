@@ -20,26 +20,36 @@ class MainViewModel : ViewModel() {
 
     // ViewModel
     val nameStateFlow = MutableStateFlow("nameStateFlow")
-    val _nameStateFlow:StateFlow<String> = nameStateFlow
+
+    val sharedFlow = MutableSharedFlow<Int>(
+        5 // 参数一：当新的订阅者Collect时，发送几个已经发送过的数据给它
+        , 3 // 参数二：MutableSharedFlow缓存区容量等于+replay，
+        , BufferOverflow.DROP_OLDEST// 参数三：缓存策略，三种 丢掉最新值、丢掉最旧值和挂起
+    )
+    var shareFlowUI:SharedFlow<Int> = sharedFlow
 
     val nameLiveData = MutableLiveData<String>("nameLiveData")
     val name1StateFlow = MutableStateFlow("name1StateFlow")
-    val sharedFlow = MutableSharedFlow<Int>(
-        5 // 参数一：当新的订阅者Collect时，发送几个已经发送过的数据给它
-        , 3 // 参数二：减去replay，MutableSharedFlow还缓存多少数据
-        , BufferOverflow.DROP_OLDEST // 参数三：缓存策略，三种 丢掉最新值、丢掉最旧值和挂起
-    )
+
+    fun testLiveData(){
+        nameLiveData.postValue("nameLiveData")
+    }
+
+    var startCount = 11
     // 在按钮中调用
     fun doAsClick() {
-        for (i in 11..20) {
+        val endCount = startCount+1
+        for (i in startCount..endCount){
             sharedFlow.tryEmit(i)
         }
+        startCount = endCount+1
     }
 
     //取消单个协防范围
     fun suspendCoroutines(){
         job.cancel()
     }
+
     init {
         for (i in 0..10) {
             sharedFlow.tryEmit(i)
@@ -54,13 +64,13 @@ class MainViewModel : ViewModel() {
         val tmp =  flowOf(10, 200, 50, "String")
         val list = arrayListOf(5, 10, 15, 20)
         val flow = flow {
-            (1..3).forEach {
+            (1..5).forEach {
                 delay(100)
                 emit(it)
             }
         }
         val chFlow = channelFlow{
-            (1..3).forEach {
+            (1..5).forEach {
                 delay(100)
                 send(it)
             }
@@ -78,6 +88,7 @@ class MainViewModel : ViewModel() {
     }
     suspend fun addCollectEvent(i: Int) {
         val sendDelayTask = sendDelayTask()
+        Log.e("sendDelayTask","is MainThread ="+(Looper.myLooper() == Looper.getMainLooper()))
         sendDelayTask.flowOn(Dispatchers.IO)
             .catch {
             Log.e("error", "throw =$this")
@@ -91,7 +102,6 @@ class MainViewModel : ViewModel() {
     private suspend fun sendDelayTask() =
         flow{
             for (i in 0..10){
-                Log.e("sendDelayTask","is MainThread ="+(Looper.myLooper() == Looper.getMainLooper()))
                 delay(500)
                 emit(Number(i))
             }

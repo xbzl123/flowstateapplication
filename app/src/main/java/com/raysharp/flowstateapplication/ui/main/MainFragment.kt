@@ -65,30 +65,44 @@ class MainFragment : Fragment() {
 
         viewModel.nameLiveData.observe(viewLifecycleOwner){
             Log.e("nameLiveData","$it")
-
         }
+        val coroutineExceptionHandler = CoroutineExceptionHandler { coroutineContext, throwable ->
+            throwable.printStackTrace()
+        }
+        lifecycleScope.launch(coroutineExceptionHandler) {
+            lifecycle.whenStarted {
 
-//        lifecycleScope.launchWhenStarted {
-//            viewModel.nameStateFlow.collect{
-//                Log.e("nameStateFlow","$it")
-//            }
-            //不生效
-//            viewModel.name1StateFlow.collect{
-//                Log.e("name1StateFlow","$it")
-//            }
-//        }
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.nameStateFlow.collect{
-                    Log.e("nameStateFlow","$it")
-                }
             }
         }
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED){
+
+            }
+        }
+
         lifecycleScope.launchWhenStarted {
+            Log.e("MainFragment","launchWhenStarted")
+            viewModel.nameStateFlow.collect{
+                Log.e("nameStateFlow","$it")
+            }
+            //不生效
             viewModel.name1StateFlow.collect{
                 Log.e("name1StateFlow","$it")
             }
         }
+
+//        lifecycleScope.launch {
+//            repeatOnLifecycle(Lifecycle.State.STARTED) {
+//                viewModel.nameStateFlow.collect{
+//                    Log.e("nameStateFlow","$it")
+//                }
+//            }
+//        }
+//        lifecycleScope.launchWhenStarted {
+//            viewModel.name1StateFlow.collect{
+//                Log.e("name1StateFlow","$it")
+//            }
+//        }
 
         //第一个协防接收数据
         lifecycleScope.launch {
@@ -112,6 +126,10 @@ class MainFragment : Fragment() {
         }
     }
 
+    override fun onStart() {
+        Log.e("MainFragment","onStart")
+        super.onStart()
+    }
     fun diffScopeCommunication(){
         lifecycleScope.launch {
             val ch = Channel<Int> {  }
